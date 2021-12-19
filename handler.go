@@ -7,8 +7,8 @@ import (
 	"net/http"
 )
 
-//Wrap API handler and returns standard http handler function
-func Wrap[RQ any, RS any](handler func(ctx context.Context, request *RQ) (RS, error)) func(w http.ResponseWriter, r *http.Request) {
+//Wrap API handler and returns standard http.HandlerFunc function
+func Wrap[RQ any, RS any](handler func(ctx context.Context, request *RQ) (RS, error)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		req := new(RQ)
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {

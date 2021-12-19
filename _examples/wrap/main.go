@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gogeneric/web"
+	"github.com/gogeneric/api"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 	h.Handler = mux
 
 	// Here is magic!
-	mux.HandleFunc("/hello", api.Wrap(handleHello))
+	mux.Handle("/hello", api.Wrap(handleHello))
 
 	if err := h.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatalln(err)

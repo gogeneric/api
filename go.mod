@@ -1,3 +1,3 @@
-module github.com/gogeneric/web
+module github.com/gogeneric/api
 
 go 1.18
