@@ -1,0 +1,12 @@
+### Request:
+http://localhost:3000/hello
+Content-Type: application/json
+
+{
+  "name": "Alex"
+}
+
+### Response:
+# http://localhost:3000/hello
+#
+#{"message":"Hello, Alex!"}
