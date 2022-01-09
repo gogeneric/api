@@ -25,11 +25,30 @@ func Wrap[RQ any, RS any](handler func(ctx context.Context, request *RQ) (RS, er
 			_, _ = w.Write([]byte(err.Error()))
 			return
 		}
-		if err := json.NewEncoder(w).Encode(resp); err != nil {
+
+		statusCode := http.StatusOK
+		contentType := "application/json"
+		var body []byte
+
+		if v, ok := (any)(resp).(WithContentType); ok {
+			contentType = v.ContentType()
+		}
+		if v, ok := (any)(resp).(WithHTTPStatus); ok {
+			statusCode = v.Status()
+		}
+		if v, ok := (any)(resp).(Renderer); ok {
+			body, err = v.Render()
+		} else {
+			body, err = json.Marshal(resp)
+		}
+		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			_, _ = w.Write([]byte(err.Error()))
 			return
 		}
+		w.WriteHeader(statusCode)
+		w.Header().Set("Content-Type", contentType)
+		w.Write(body)
 	}
 }
 
@@ -42,10 +61,4 @@ func richifyRequest[RQ any](req *RQ, baseRequest *http.Request) {
 	}
 }
 
-type WithHeader interface {
-	WithHeader(header http.Header)
-}
-
-type WithMethod interface {
-	WithMethod(method string)
-}
+type NilRequest struct{}

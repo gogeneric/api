@@ -1,32 +1,26 @@
-# API
-
-Generic api functions
-
-## Usage
-
-### api.Wrap(handler)
-
-Function Wrap wraps API handler and returns standard http.HandlerFunc. It encapsulate body parsing.
-
-#### Example
-
-```go
 package main
 
 import (
+	"bytes"
 	"context"
-	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 
 	"github.com/gogeneric/api"
 )
 
+var tpl *template.Template
+
 func main() {
 	h := &http.Server{Addr: "0.0.0.0:3000"}
 	mux := http.NewServeMux()
 	h.Handler = mux
-
+	var err error
+	tpl, err = template.ParseGlob("./*.gohtml")
+	if err != nil {
+		log.Fatalln(err)
+	}
 	// Here is magic!
 	mux.Handle("/hello", api.Wrap(handleHello))
 
@@ -35,19 +29,26 @@ func main() {
 	}
 }
 
-// Our API handler with custom request and response types
 func handleHello(ctx context.Context, req *helloRequest) (*helloResponse, error) {
-	return &helloResponse{Message: fmt.Sprintf("Hello, %s!", req.Name)}, nil
+	return &helloResponse{
+		Message:  "Hello, " + req.Name,
+		template: "tpl.gohtml",
+	}, nil
 }
 
-// Custom request type
 type helloRequest struct {
 	Name string `json:"name"`
 }
 
-// Custom response type
 type helloResponse struct {
-	Message string `json:"message"`
+	template string
+	Message  string
 }
 
-```
+func (r *helloResponse) Render() ([]byte, error) {
+	buf := bytes.NewBuffer([]byte{})
+	if err := tpl.ExecuteTemplate(buf, r.template, r); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
