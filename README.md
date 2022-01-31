@@ -1,6 +1,6 @@
-# API
+# API wrapper
 
-Generic api functions
+API handler wrapper
 
 ## Usage
 
@@ -19,7 +19,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gogeneric/api"
+	"github.com/neonxp/api"
 )
 
 func main() {
